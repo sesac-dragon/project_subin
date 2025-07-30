@@ -7,7 +7,7 @@ CREATE TABLE mountain_info
     lon FLOAT,  
     address VARCHAR(255), 
     image VARCHAR(255), 
-    apex INT,
+    apex FLOAT,
     level VARCHAR(255),
     feature LONGTEXT,
     summary LONGTEXT, 
