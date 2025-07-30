@@ -4,14 +4,14 @@ import json
 import re
 
 
+ 
 def mountain_crawler():
     def total_minute(time_str):
-        hours = re.search(r'(\d+)\s*시간', time_str)
-        minutes = re.search(r'(\d+)\s*분', time_str)
-        h = int(hours.group(1)) if hours else 0
-        m = int(minutes.group(1)) if minutes else 0
-        return h * 60 + m
-
+            hours = re.search(r'(\d+)\s*시간', time_str)
+            minutes = re.search(r'(\d+)\s*분', time_str)
+            h = int(hours.group(1)) if hours else 0
+            m = int(minutes.group(1)) if minutes else 0
+            return h * 60 + m
     request = requests.get('https://www.foresttrip.go.kr/pot/cc/hm/selectHndfmsmtnMngme.do?hmpgId=FRTRL&menuId=002005',
                     headers={
                         'user-agent':  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36'
@@ -26,6 +26,8 @@ def mountain_crawler():
 
     mt_area = []
     seen = set()
+
+
     for i in range(1,10):
         data = { 'fmmntArcd' : i}
 
@@ -64,7 +66,7 @@ def mountain_crawler():
                         '경도' : mountain['yCrd']
                     })
                     
-    src = []
+
     mountain_info = mt_area
 
     for i in range(125):
@@ -84,9 +86,10 @@ def mountain_crawler():
 
         imgs = soup.select('.pt img')
 
+        src = []
         for img in imgs:
             src.append(img.get('src'))
-        m_img = src[0]
+        
 
         mt_info = []
         for m in mountain1:
@@ -103,10 +106,17 @@ def mountain_crawler():
                 courses = m.select('table tbody tr')
                 for course in courses:
                     c = course.select('td')
+                    
+                    key = c[0].text
+                    if key == '코스1':
+                        key = '추천코스'
+                    elif key == '코스2(하산전용)':
+                        key = '기타코스1'
+
                     mt_info.append({
-                        c[0].text: c[1].text.strip()
+                        key : c[1].text.strip()
                     })
-                    if c[0].text == '추천코스':
+                    if key == '추천코스':
                         mt_info.append({
                             '소요시간' : total_minute(c[2].text)
                         })
@@ -115,6 +125,7 @@ def mountain_crawler():
                             f'소요시간{time_index}' : total_minute(c[2].text)
                             })
                         time_index += 1
+                
             elif label == '높이':
                 mt_info.append({
                     label : content.split(' ')[0]
@@ -126,7 +137,7 @@ def mountain_crawler():
 
             # 이미지
             mt_info.append({
-                '이미지' : f'https://www.foresttrip.go.kr{m_img}'
+                '이미지' : f'https://www.foresttrip.go.kr{src[0]}'
             })
 
         for m_info in mt_info:
